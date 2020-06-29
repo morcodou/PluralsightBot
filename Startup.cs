@@ -6,12 +6,14 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Azure;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 using PluralsightBot.Bots;
+using PluralsightBot.Services;
 
 namespace PluralsightBot
 {
@@ -32,8 +34,23 @@ namespace PluralsightBot
             // Create the Bot Framework Adapter with error handling enabled.
             services.AddSingleton<IBotFrameworkHttpAdapter, AdapterWithErrorHandler>();
 
+            ConfigureStates(services);
             // Create the bot as a transient. In this case the ASP Controller is expecting an IBot.
-            services.AddTransient<IBot, EchoBot>();
+            //services.AddTransient<IBot, EchoBot>();
+            services.AddTransient<IBot, GreetingBot>();
+        }
+
+        public void ConfigureStates (IServiceCollection services)
+        {
+            //services.AddSingleton<IStorage, MemoryStorage>();
+
+            string storageAccount = Configuration.GetValue<string>("storageAccount");
+            string containerName = Configuration.GetValue<string>("containerName");
+            services.AddSingleton<IStorage>(new AzureBlobStorage(storageAccount, containerName));
+
+            services.AddSingleton<UserState>();
+            services.AddSingleton<ConversationState>();
+            services.AddSingleton<StateService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
