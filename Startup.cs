@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 using PluralsightBot.Bots;
+using PluralsightBot.Dialogs;
 using PluralsightBot.Services;
 
 namespace PluralsightBot
@@ -35,9 +36,10 @@ namespace PluralsightBot
             services.AddSingleton<IBotFrameworkHttpAdapter, AdapterWithErrorHandler>();
 
             ConfigureStates(services);
+            ConfigureDialogs(services);
             // Create the bot as a transient. In this case the ASP Controller is expecting an IBot.
             //services.AddTransient<IBot, EchoBot>();
-            services.AddTransient<IBot, GreetingBot>();
+            services.AddTransient<IBot, DialogBot<MainDialog>>();
         }
 
         public void ConfigureStates (IServiceCollection services)
@@ -51,6 +53,10 @@ namespace PluralsightBot
             services.AddSingleton<UserState>();
             services.AddSingleton<ConversationState>();
             services.AddSingleton<StateService>();
+        }
+        public void ConfigureDialogs(IServiceCollection services)
+        {
+            services.AddSingleton<MainDialog>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
